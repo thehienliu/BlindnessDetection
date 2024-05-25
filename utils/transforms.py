@@ -1,3 +1,6 @@
+import torch
+from torchvision.transforms import functional as F
+
 class CricleCrop:
     def __init__(self, tol: int = 7, device='cpu') -> None:
       self.tol = tol
