@@ -1,4 +1,5 @@
 import torch
+import argparse
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import transforms, models
@@ -7,12 +8,25 @@ from utils.transforms import CricleCrop, Normalize
 from models.blindness_detection import BlindnessDetection
 from trainers.blindness_trainer import BlindnessDetectionTrainer
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train Blindness Detection Model")
+    parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu', help='Device to use for training (e.g., "cuda" or "cpu")')
+    parser.add_argument('--batch_size', type=int, default=32, help="Batch size for dataloader.")
+    parser.add_argument('--hidden_size', type=int, default=128, help="Hidden size in model's classfier.")
+    parser.add_argument('--output_size', type=int, default=5, help="Final output from model's classifier.")
+    parser.add_argument('--learning_rate', type=float, default=0.001, help="Start learning rate.")
+    parser.add_argument('--epochs', type=int, default=20, help="Training epoch.")
+    parser.add_argument('--mixed_precision', type=bool, default=False, help="Using float16 training.")
+
+    return parser.parse_args()
+
 if __name__ == "__main__":
 
-  device = 'cuda' if torch.cuda.is_available() else 'cpu'
+  # Get parser
+  args = parse_args()
 
   transform = transforms.Compose([
-      CricleCrop(device=device),
+      CricleCrop(device=args.device),
       transforms.Resize((224, 224)),
       transforms.RandomHorizontalFlip(),
       transforms.RandomVerticalFlip(),
@@ -33,17 +47,17 @@ if __name__ == "__main__":
   train_data = APTOS2019Dataset(root='data', dataset_split='train', download=True, transform=transform)
   val_data = APTOS2019Dataset(root='data', dataset_split='val', download=True, transform=test_transform)
 
-  train_dataloader = DataLoader(train_data, batch_size=32, shuffle=True)
-  val_dataloader = DataLoader(val_data, batch_size=32, shuffle=False)
+  train_dataloader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
+  val_dataloader = DataLoader(val_data, batch_size=args.batch_size, shuffle=False)
 
   weights = models.VGG19_BN_Weights.DEFAULT
   extractor = models.vgg19_bn(weights=weights)
 
-  model = BlindnessDetection(extractor, 128, 5)
+  model = BlindnessDetection(extractor=extractor, hidden_size=args.hidden_size, output_size=args.output_size)
   criterion = nn.CrossEntropyLoss()
-  optimizer = torch.optim.AdamW(model.parameters(), betas=(0.85, 0.95), weight_decay=0.0001)
+  optimizer = torch.optim.AdamW(model.parameters(), betas=(0.85, 0.95), weight_decay=0.0001, lr=args.learning_rate)
   scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.85)
-  mixed_precision = False
+  mixed_precision = args.mixed_precision
 
-  trainer = BlindnessDetectionTrainer(model, criterion, optimizer, scheduler, device, mixed_precision)
-  trainer.fit(10, train_dataloader, val_dataloader, 2)
+  trainer = BlindnessDetectionTrainer(model, criterion, optimizer, scheduler, args.device, mixed_precision)
+  trainer.fit(args.epochs, train_dataloader, val_dataloader, 2)
