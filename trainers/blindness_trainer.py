@@ -6,23 +6,6 @@ from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import _LRScheduler
 from tqdm.auto import tqdm
-from pytz import timezone
-from datetime import datetime
-
-
-# Setup logging
-timetz = lambda *args: datetime.now(timezone('Asia/Ho_Chi_Minh')).timetuple()
-logging.Formatter.converter = timetz
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%d-%m-%Y %H:%M:%S",
-    filename="basic.log",
-    filemode="w"
-)
-logging.getLogger('PIL')
-logger = logging.getLogger()
 
 class BlindnessDetectionTrainer:
   def __init__(self,
@@ -30,6 +13,7 @@ class BlindnessDetectionTrainer:
                criterion: nn.Module,
                optimizer: Optimizer,
                scheduler: _LRScheduler,
+               logger: logging.Logger,
                device: Union[str, torch.device]='cpu',
                mixed_precision: bool=False):
 
@@ -38,6 +22,7 @@ class BlindnessDetectionTrainer:
     self.criterion = criterion
     self.optimizer = optimizer
     self.scheduler = scheduler
+    self.logger = logger
     self.mixed_precision = mixed_precision
     if self.mixed_precision:
       self.scaler = torch.cuda.amp.GradScaler(enabled=True)
@@ -53,15 +38,15 @@ class BlindnessDetectionTrainer:
     """Fitting function to start training and validation of the trainer"""
 
     self.model.to(self.device)
-    logger.debug(f"Send model to device: {next(self.model.parameters()).device}")
+    self.logger.debug(f"Send model to device: {next(self.model.parameters()).device}")
 
     for epoch in range(epochs):
       train_metrics = self.train_epoch(train_dataloader)
-      logger.info(train_metrics)
+      self.logger.info(train_metrics)
 
       if (epoch + 1) % eval_every == 0:
         val_metrics = self.val_epoch(val_dataloader)
-        logger.info(val_metrics)
+        self.logger.info(val_metrics)
 
       # Log learning rate
       curr_lr = self.optimizer.param_groups[0]['lr']
@@ -72,7 +57,7 @@ class BlindnessDetectionTrainer:
         self.scheduler.step()
 
       new_lr = self.optimizer.param_groups[0]['lr']
-      logger.debug(f'Old lr: {curr_lr:.6f} - New lr: {new_lr:.6f}')
+      self.logger.debug(f'Old lr: {curr_lr:.6f} - New lr: {new_lr:.6f}')
 
   def train_epoch(self, train_dataloader: DataLoader):
     """Training logic for a training epoch"""
