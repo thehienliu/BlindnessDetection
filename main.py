@@ -29,15 +29,27 @@ def instantiate_logger() -> logging.Logger:
     timetz = lambda *args: datetime.now(timezone('Asia/Ho_Chi_Minh')).timetuple()
     logging.Formatter.converter = timetz
 
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        datefmt="%d-%m-%Y %H:%M:%S",
-        filename="basic.log",
-        filemode="w"
-    )
-    logging.getLogger('PIL')
+    # Create handlers
+    file_handler = logging.FileHandler('basic.log')
+    console_handler = logging.StreamHandler()
+
+    # Set logging level for handlers
+    file_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(logging.DEBUG)
+
+    # Create formatters and add them to handlers
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%d-%m-%Y %H:%M:%S")
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+
+    # Get the logger
     logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # Add handlers to the logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
     return logger
 
 if __name__ == "__main__":
