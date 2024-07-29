@@ -117,8 +117,12 @@ if __name__ == "__main__":
         root="data", dataset_split="test", download=True, transform=test_transform
     )
 
-    train_dataloader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
-    val_dataloader = DataLoader(val_data, batch_size=args.batch_size, shuffle=False)
+    train_dataloader = DataLoader(
+        train_data, batch_size=config.training.batch_size, shuffle=True
+    )
+    val_dataloader = DataLoader(
+        val_data, batch_size=config.training.batch_size, shuffle=False
+    )
 
     # Setup model
     model = BlindnessDetection(

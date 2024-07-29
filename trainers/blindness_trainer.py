@@ -32,7 +32,7 @@ class BlindnessDetectionTrainer:
         self.logger = logger
         self.mixed_precision = mixed_precision
         if self.mixed_precision:
-            self.scaler = torch.cuda.amp.GradScaler(enabled=True)
+            self.scaler = torch.amp.GradScaler(enabled=True)
         else:
             self.scaler = None
 
@@ -52,12 +52,15 @@ class BlindnessDetectionTrainer:
         )
 
         for epoch in range(epochs):
+
+            self.logger.info(f"Epoch {epoch}:")
+
             train_metrics = self.train_epoch(train_dataloader)
-            self.logger.info(train_metrics)
+            self.logger.info(f"Training stats: ", train_metrics)
 
             if (epoch + 1) % eval_every == 0:
                 val_metrics = self.eval_epoch(val_dataloader)
-                self.logger.info(val_metrics)
+                self.logger.info(f"Evaluate stats: ", val_metrics)
 
             # Log learning rate
             curr_lr = self.optimizer.param_groups[0]["lr"]

@@ -5,13 +5,20 @@ from torchvision import models
 class ResNet50:
     def __init__(self) -> None:
 
-        self.features = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
-        self.avgpool = self.features.avgpool
+        model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+        self.features = nn.Sequential(
+            model.conv1,
+            model.bn1,
+            model.relu,
+            model.maxpool,
+            model.layer1,
+            model.layer2,
+            model.layer3,
+            model.layer4,
+        )
+        self.avgpool = nn.Sequential(model.avgpool, nn.Flatten())
         self.input_size = 224
         self.output_size = 2048
-
-        delattr(self.features, "fc")
-        delattr(self.features, "avgpool")
 
 
 class VGG19:

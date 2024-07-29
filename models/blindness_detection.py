@@ -7,7 +7,7 @@ class BlindnessDetection(nn.Module):
     def __init__(self, module_name: str, hidden_size: int, output_size: int):
         super().__init__()
 
-        extractor = retrieve_extractor_fn(module_name)
+        extractor = retrieve_extractor_fn(module_name)()
         self.extractor = extractor.features
         self.avgpool = extractor.avgpool
         self.classifier = nn.Sequential(
