@@ -1,0 +1,20 @@
+transform:
+  input_size: 224
+  horizontal_flip: 0.5
+  vertical_flip: 0.5
+  rotation: 
+    - 0
+    - 15
+
+model:
+  extractor_module_name: "resnet50"
+  hidden_size: 128
+  output_size: 5
+
+training:
+  epochs: 10
+  batch_size: 32
+  device: "cuda"
+  mixed_precision: True
+  learning_rate: 1e-3
+  eval_every: 2
