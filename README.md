@@ -18,7 +18,7 @@ The web application is developed using Streamlit. Users can upload retina images
 Configurable Training: Training process can be easily controlled via YAML files.
 * Web Interface: Provides a user-friendly interface for predictions and visualizations.
 * Large Language Model: Offers advice based on predictions and user queries.
- ![screencapture-localhost-8501-2024-08-17-12_23_04](https://github.com/user-attachments/assets/64428006-c738-4a80-b91f-04a348c5fc8a)
+ ![screencapture-localhost-8501-2024-08-21-14_20_54](https://github.com/user-attachments/assets/9dcc788a-8916-4df8-b5d2-b324ef53dacd)
 
 ## Getting Started
 
